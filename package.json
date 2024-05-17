@@ -1,6 +1,6 @@
 {
-  "name": "rng-lib",
-  "version": "1.0.2",
+  "name": "rng-ts-lib",
+  "version": "1.0.1",
   "description": "RNG Library",
   "author": "Nucast",
   "homepage": "https://github.com/Nucastio/rng-ts-lib",
