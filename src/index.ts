@@ -1,162 +1,83 @@
-import type {
-  ConstructorParams,
-  DidRegisterParams,
-  DidRegisterResponse,
-  InitiateResponse,
-  MintOracleDidResponse,
-  UpdateOracleParams,
-  UpdateOracleResponse,
-} from "./@types/types";
+import { getInstance, getRandomID } from "utils";
+import { init } from "./endpoints/init";
+import type { IRNGParams, IOracle } from "./@types/types";
+import { AxiosInstance } from "axios";
+import { mint } from "endpoints/oracle/mint";
+import { register } from "endpoints/oracle/register";
+import { update } from "endpoints/oracle/update";
+import { query } from "endpoints/oracle/query";
 
 export class RNG {
   network: 0 | 1;
   blockfrostApiKey: string;
   walletSeed: string;
-  CBORhex: string;
-  rngfid: string;
-  rnlen: number;
-  ogmiosUrl: string;
-  RNG_API_URL: string;
+  oracleCBOR: string;
+  rngCBOR: string;
+  ogmiosURL: string;
+  rngfid: string | undefined;
+  rngOutputLen: number | undefined;
 
-  constructor({
-    network,
-    blockfrostApiKey,
-    walletSeed,
-    CBORhex,
-    rngfid,
-    rnlen,
-    ogmiosUrl,
-    RNG_API_URL,
-  }: ConstructorParams & { RNG_API_URL?: string }) {
+  instance: AxiosInstance;
+
+  oracle: {
+    mint: IOracle["mint"];
+    register: IOracle["register"];
+    update: IOracle["update"];
+    query: IOracle["query"];
+  };
+
+  constructor(props: IRNGParams) {
+    const {
+      ogmiosURL,
+      oracleCBOR,
+      rngAPIURL,
+      rngCBOR,
+      rngOutputLen,
+      blockfrostApiKey,
+      network,
+      rngfid,
+      walletSeed,
+    } = props;
+
     this.network = network;
     this.blockfrostApiKey = blockfrostApiKey;
     this.walletSeed = walletSeed;
-    this.CBORhex = CBORhex;
-    this.rngfid = rngfid;
-    this.rnlen = rnlen;
-    this.ogmiosUrl = ogmiosUrl;
-    this.RNG_API_URL = RNG_API_URL || "";
+    this.oracleCBOR = oracleCBOR;
+    this.rngCBOR = rngCBOR;
+    this.ogmiosURL = ogmiosURL;
+    this.rngfid = rngfid ?? this.getRandomID();
+    this.rngOutputLen = rngOutputLen ?? 4;
+
+    this.instance = getInstance({ apiURL: rngAPIURL });
+
+    this.mint = this.mint.bind(this);
+    this.register = this.register.bind(this);
+    this.update = this.update.bind(this);
+    this.query = this.query.bind(this);
+
+    this.oracle = {
+      mint: this.mint,
+      register: this.register,
+      update: this.update,
+      query: this.query,
+    };
   }
-  async initiate() {
-    try {
-      const response = await fetch(this.RNG_API_URL + "/api/initiate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          network: this.network,
-          blockfrostApiKey: this.blockfrostApiKey,
-          walletSeed: this.walletSeed,
-          CBORhex: this.CBORhex,
-          rngfid: this.rngfid,
-          rnlen: this.rnlen,
-        }),
-      });
 
-      if (!response.ok) {
-        const resJson = await response.json();
-        console.log(resJson);
-        throw new Error(`Failed to initiate RNG: ${response.statusText}`);
-      }
+  /* RNG Actions */
+  init = init;
+  getRandomID = getRandomID;
 
-      const responseData = (await response.json()) as InitiateResponse;
-      return responseData;
-    } catch (error) {
-      throw new Error(`Error initializing RNG: ${error}`);
-    }
-  }
-  async didRegister({ initiator, seedtxid, oracleDid }: DidRegisterParams) {
-    try {
-      const response = await fetch(this.RNG_API_URL + "/api/did-register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          network: this.network,
-          blockfrostApiKey: this.blockfrostApiKey,
-          ogmiosUrl: this.ogmiosUrl,
-          walletSeed: this.walletSeed,
-          CBORhex: this.CBORhex,
-          initiator,
-          rngfid: this.rngfid,
-          seedtxid,
-          rnlen: this.rnlen,
-          oracleDid,
-        }),
-      });
+  /* Oracle Actions */
+  mint = mint;
+  register = register;
+  update = update;
+  query = query;
 
-      if (!response.ok) {
-        throw new Error(`Failed to register`);
-      }
+  updateConfig<T extends keyof RNG>(key: T, value: RNG[T]) {
+    const isKeyExists = this.hasOwnProperty(key);
 
-      const responseData = (await response.json()) as DidRegisterResponse;
-      return responseData;
-    } catch (error) {
-      throw new Error(`Error registering`);
-    }
-  }
-  async updateOracle({
-    lastUpdatedTx,
-    oracleDid,
-    seedtxid,
-    initiator,
-  }: UpdateOracleParams) {
-    try {
-      const response = await fetch(this.RNG_API_URL + "/api/update-oracle", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          network: this.network,
-          blockfrostApiKey: this.blockfrostApiKey,
-          ogmiosUrl: this.ogmiosUrl,
-          walletSeed: this.walletSeed,
-          CBORhex: this.CBORhex,
-          initiator,
-          rngfid: this.rngfid,
-          seedtxid,
-          rnlen: this.rnlen,
-          lastUpdatedTx,
-          oracleDid,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update oracle");
-      }
-
-      const responseData = (await response.json()) as UpdateOracleResponse;
-      return responseData;
-    } catch (error) {
-      throw new Error(`Error updating oracle`);
-    }
-  }
-  async mintOracleDid(assetName: string) {
-    try {
-      const response = await fetch(this.RNG_API_URL + "/api/mint-oracle", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          network: this.network,
-          blockfrostApiKey: this.blockfrostApiKey,
-          walletSeed: this.walletSeed,
-          assetName,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to mint oracle DID`);
-      }
-
-      const responseData = (await response.json()) as MintOracleDidResponse;
-      return responseData;
-    } catch (error) {
-      throw new Error(`Error minting oracle DID`);
-    }
+    if (!isKeyExists) throw new Error(`'${key}' does not exist`);
+    
+    (this as RNG)[key] = value;
   }
 }
