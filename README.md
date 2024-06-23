@@ -1,7 +1,9 @@
 # RNG TS Lib
 
 ## Installation
+
 To install the library:
+
 ```sh
 npm install rng-ts-lib
 ```
@@ -9,10 +11,13 @@ npm install rng-ts-lib
 ## Usage
 
 ### Importing the Library
+
 ```ts
-import { RNG } from 'rng-ts-lib';
+import { RNG } from "rng-ts-lib";
 ```
+
 ### Initialization
+
 To initialize the RNG library, you need to provide the following parameters:
 
 - `network`: The network to use (0 for testnet, 1 for mainnet).
@@ -26,21 +31,23 @@ To initialize the RNG library, you need to provide the following parameters:
 - `rngOutputLen` (optional): The length of the random number (default is 4).
 
 Example:
+
 ```ts
 const rng = new RNG({
   network: 0,
-  blockfrostApiKey: 'your-blockfrost-api-key',
-  walletSeed: 'your-wallet-seed',
-  oracleCBOR: 'oracle-cbor',
-  rngCBOR: 'rng-cbor',
-  ogmiosURL: 'https://ogmios-url',
-  rngAPIURL: 'https://rng-api-url',
+  blockfrostApiKey: "your-blockfrost-api-key",
+  walletSeed: "your-wallet-seed",
+  oracleCBOR: "oracle-cbor",
+  rngCBOR: "rng-cbor",
+  ogmiosURL: "https://ogmios-url",
+  rngAPIURL: "https://rng-api-url",
 });
 ```
 
 ### Methods
 
 #### `init()`
+
 Initiates an RNG DID.
 
 - **Returns**:
@@ -50,23 +57,27 @@ Initiates an RNG DID.
   - `rnlen`: Random Number Length.
 
 Example:
+
 ```ts
 const initResult = await rng.init();
 console.log(initResult);
 ```
 
 #### `getRandomID()`
+
 Generates a random ID for RNG ID.
 
 - **Returns**: RNG ID.
 
 Example:
+
 ```ts
 const randomID = rng.getRandomID();
 console.log(randomID);
 ```
 
 #### `updateConfig()`
+
 Updates key values in the class.
 
 - **Parameters**:
@@ -74,16 +85,19 @@ Updates key values in the class.
   - `value`: The new value.
 
 Example:
+
 ```ts
-rng.updateConfig('network', 1);
+rng.updateConfig("network", 1);
 ```
 
 ### Oracle Functions
 
 #### `mint(oracleDIDName: string)`
+
 Mints an Oracle DID to the wallet.
 
 - **Parameters**:
+
   - `oracleDIDName`: Name of the Oracle DID (UTF-8 encoded).
 
 - **Returns**:
@@ -91,15 +105,18 @@ Mints an Oracle DID to the wallet.
   - `oracleDIDUnit`: Unit ID of Oracle DID.
 
 Example:
+
 ```ts
-const mintResult = await rng.oracle.mint('my-oracle-did');
+const mintResult = await rng.oracle.mint("my-oracle-did");
 console.log(mintResult);
 ```
 
 #### `register(initRNGTx: string, oracleDIDUnit: string)`
+
 Registers the Oracle DID to the contract.
 
 - **Parameters**:
+
   - `initRNGTx`: Transaction hash of initiated RNG ID.
   - `oracleDIDUnit`: Unit ID of Oracle DID.
 
@@ -109,18 +126,21 @@ Registers the Oracle DID to the contract.
   - `rngOutput`: Random number from the Oracle.
 
 Example:
+
 ```ts
 const registerResult = await rng.oracle.register({
-  initRNGTx: 'init-rng-tx-hash',
-  oracleDIDUnit: 'oracle-did-unit',
+  initRNGTx: "init-rng-tx-hash",
+  oracleDIDUnit: "oracle-did-unit",
 });
 console.log(registerResult);
 ```
 
 #### `update(initRNGTx: string, oracleDIDUnit: string, currUpdatedOracleDIDTx: string)`
+
 Updates the data to Oracle DID.
 
 - **Parameters**:
+
   - `initRNGTx`: Transaction hash of initiated RNG ID.
   - `oracleDIDUnit`: Unit ID of Oracle DID.
   - `currUpdatedOracleDIDTx`: Latest Oracle DID transaction hash for UTXO reference in the contract.
@@ -131,26 +151,34 @@ Updates the data to Oracle DID.
   - `rngOutput`: Random number from the Oracle.
 
 Example:
+
 ```ts
 const updateResult = await rng.oracle.update({
-  initRNGTx: 'init-rng-tx-hash',
-  oracleDIDUnit: 'oracle-did-unit',
-  currUpdatedOracleDIDTx: 'current-updated-oracle-did-tx',
+  initRNGTx: "init-rng-tx-hash",
+  oracleDIDUnit: "oracle-did-unit",
+  currUpdatedOracleDIDTx: "current-updated-oracle-did-tx",
 });
 console.log(updateResult);
 ```
 
 #### `query(currUpdatedOracleDIDTx: string)`
+
 Queries the RNG data of Oracle DID.
 
 - **Parameters**:
+
   - `currUpdatedOracleDIDTx`: Latest Oracle DID transaction hash for UTXO reference in the contract.
 
 - **Returns**:
   - `rngOutput`: Random number from the Oracle.
 
 Example:
+
 ```ts
-const queryResult = await rng.oracle.query('current-updated-oracle-did-tx');
+const queryResult = await rng.oracle.query("current-updated-oracle-did-tx");
 console.log(queryResult);
 ```
+
+### CLI App
+
+For integrating this library, you can refer to this [repository](https://github.com/Nucastio/rng-ts-cli).
