@@ -1,5 +1,5 @@
 import { AxiosInstance } from "axios";
-import { RNG as RNGClass } from "../index";
+import { RNG as RNGClass } from "../index.js";
 
 export declare interface IRNGParams {
   network: 0 | 1;
@@ -37,7 +37,7 @@ export interface IInitData {
   rnlen: number;
 }
 
-export interface IOracle {
+export declare interface IOracle {
   mint: (
     this: RNGClass,
     oracleDIDName: string
