@@ -181,4 +181,4 @@ console.log(queryResult);
 
 ### CLI App
 
-For integrating this library, you can refer to this [repository](https://github.com/Nucastio/rng-ts-cli).
+For integrating this library, you can refer to this [repository](https://github.com/Nucastio/rng-ts-example).
